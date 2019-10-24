@@ -82,21 +82,20 @@ public class MinesweeperGame extends Game {
 
     private void openTile(int x, int y){
         GameObject field = gameField[y][x];
-        if (!field.isOpen() && field.getCountMineNeighbors() == 0 && !field.isMine()){
-            field.setOpen(true);
-            setCellValue(x, y, "");
-            setCellColor(x, y, Color.GREEN);
-            getNeighbors(field).stream().filter(n-> !n.isOpen() && n.getCountMineNeighbors() == 0)
-                    .forEach(n->openTile(n.getX(), n.getY()));
-        } else if (!field.isOpen() && field.getCountMineNeighbors() != 0) {
+        if (!field.isFlag()) {
             if (field.isMine()) {
                 setCellValue(x, y, MINE);
                 field.setOpen(true);
                 setCellColor(x, y, Color.RED);
-            } else {
+            } else if (!field.isOpen() && field.getCountMineNeighbors() != 0) {
                 setCellNumber(x, y, field.getCountMineNeighbors());
                 field.setOpen(true);
                 setCellColor(x, y, Color.GREEN);
+            } else if (!field.isOpen() && field.getCountMineNeighbors() == 0 && !field.isMine()) {
+                setCellValue(x, y, "");
+                field.setOpen(true);
+                setCellColor(x, y, Color.GREEN);
+                getNeighbors(field).stream().forEach(n -> openTile(n.getX(), n.getY()));
             }
         }
     }
@@ -112,9 +111,11 @@ public class MinesweeperGame extends Game {
         if (!field.isOpen()){
             if (!field.isFlag()){
                 setCellValue(x, y, FLAG);
+                field.setFlag(true);
                 countFlags--;
             } else {
                 setCellValue(x, y, "");
+                field.setFlag(false);
                 countFlags++;
             }
         }
