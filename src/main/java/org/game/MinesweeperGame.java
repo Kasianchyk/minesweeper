@@ -16,6 +16,9 @@ public class MinesweeperGame extends Game {
     private GameObject[][] gameField = new GameObject[SIDE][SIDE];
     private int countMinesOnField = 0;
     private int countFlags = 0;
+    private int countClosedTiles = SIDE * SIDE;
+    private boolean isGameStopped;
+    private int score = 0;
 
     @Override
     public void initialize(){
@@ -82,22 +85,41 @@ public class MinesweeperGame extends Game {
 
     private void openTile(int x, int y){
         GameObject field = gameField[y][x];
-        if (!field.isFlag()) {
-            if (field.isMine()) {
-                setCellValue(x, y, MINE);
-                field.setOpen(true);
-                setCellColor(x, y, Color.RED);
-            } else if (!field.isOpen() && field.getCountMineNeighbors() != 0) {
-                setCellNumber(x, y, field.getCountMineNeighbors());
+        if (!isGameStopped && !field.isFlag() && !field.isOpen()){
+            if (!field.isMine()) {
                 field.setOpen(true);
                 setCellColor(x, y, Color.GREEN);
-            } else if (!field.isOpen() && field.getCountMineNeighbors() == 0 && !field.isMine()) {
-                setCellValue(x, y, "");
-                field.setOpen(true);
-                setCellColor(x, y, Color.GREEN);
-                getNeighbors(field).stream().forEach(n -> openTile(n.getX(), n.getY()));
+                countClosedTiles -= 1;
+                score += 5;
+                setScore(score);
+                if (field.getCountMineNeighbors() == 0) {
+                    setCellValue(x, y, "");
+                    for (GameObject obj : getNeighbors(field)) {
+                        openTile(obj.getX(), obj.getY());
+                    }
+                } else {
+                    setCellNumber(x, y, field.getCountMineNeighbors());
+                }
+                if (countMinesOnField == countClosedTiles) win();
+            } else {
+                setCellValueEx(x, y, Color.RED, MINE);
+                gameOver();
             }
         }
+        if (isGameStopped){
+            if (countMinesOnField == countClosedTiles) win();
+            else gameOver();
+        }
+    }
+
+    private void gameOver(){
+        isGameStopped = true;
+        showMessageDialog(Color.AQUA, "GAME OVER", Color.RED, 50);
+    }
+
+    private void win(){
+        isGameStopped = true;
+        showMessageDialog(Color.ALICEBLUE, "YOU WIN", Color.GOLD, 50);
     }
 
     @Override
