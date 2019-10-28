@@ -9,4 +9,9 @@ public class SimpleTest {
     public void simpleTest(){
         Assert.assertTrue(true);
     }
+
+    @Test
+    public void testFailed(){
+        Assert.assertTrue(false);
+    }
 }
