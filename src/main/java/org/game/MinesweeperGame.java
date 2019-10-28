@@ -35,6 +35,7 @@ public class MinesweeperGame extends Game {
                     countMinesOnField++;
                 }
                 setCellColor(i, j, Color.ORANGE);
+                setCellValue(i, j, "");
             }
         }
         countFlags = countMinesOnField;
@@ -122,23 +123,35 @@ public class MinesweeperGame extends Game {
         showMessageDialog(Color.ALICEBLUE, "YOU WIN", Color.GOLD, 50);
     }
 
+    private void restart(){
+        isGameStopped = false;
+        countClosedTiles = SIDE * SIDE;
+        countMinesOnField = 0;
+        score = 0;
+        setScore(score);
+        createGame();
+    }
+
     @Override
     public void onMouseLeftClick(int x, int y) {
-        openTile(x, y);
+        if (isGameStopped) restart();
+        else openTile(x, y);
     }
 
     @Override
     public void onMouseRightClick(int x, int y) {
-        GameObject field = gameField[y][x];
-        if (!field.isOpen()){
-            if (!field.isFlag()){
-                setCellValue(x, y, FLAG);
-                field.setFlag(true);
-                countFlags--;
-            } else {
-                setCellValue(x, y, "");
-                field.setFlag(false);
-                countFlags++;
+        if (!isGameStopped) {
+            GameObject field = gameField[y][x];
+            if (!field.isOpen()) {
+                if (!field.isFlag()) {
+                    setCellValue(x, y, FLAG);
+                    field.setFlag(true);
+                    countFlags--;
+                } else {
+                    setCellValue(x, y, "");
+                    field.setFlag(false);
+                    countFlags++;
+                }
             }
         }
     }
